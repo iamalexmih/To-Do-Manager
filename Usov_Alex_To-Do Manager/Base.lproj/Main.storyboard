@@ -65,7 +65,7 @@
                     <navigationItem key="navigationItem" id="Myu-8O-SGC">
                         <barButtonItem key="rightBarButtonItem" systemItem="compose" id="2BQ-1A-krx">
                             <connections>
-                                <segue destination="lzI-J1-jKp" kind="show" id="ZWe-oN-SSt"/>
+                                <segue destination="lzI-J1-jKp" kind="show" identifier="toCreateScreen" id="ZWe-oN-SSt"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -77,7 +77,7 @@
         <!--Task Edit Table View Controller-->
         <scene sceneID="cOJ-2b-tiT">
             <objects>
-                <tableViewController id="lzI-J1-jKp" customClass="TaskEdit_TableViewController" customModule="Usov_Alex_To_Do_Manager" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="TaskEditScreen" id="lzI-J1-jKp" customClass="TaskEdit_TableViewController" customModule="Usov_Alex_To_Do_Manager" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" id="zdZ-8n-h8e">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -138,15 +138,33 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="CqO-LW-nLF" kind="show" id="GAd-PW-kUm"/>
+                                            <segue destination="CqO-LW-nLF" kind="show" identifier="toTaskPriorityScreen" id="GAd-PW-kUm"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="XsM-SP-CfE">
-                                        <rect key="frame" x="0.0" y="106" width="414" height="43.5"/>
+                                        <rect key="frame" x="0.0" y="106" width="414" height="43"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="XsM-SP-CfE" id="oi7-0Z-po5">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Выполнена" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A3C-gG-g7z">
+                                                    <rect key="frame" x="20" y="11" width="90" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="hA0-KR-0px">
+                                                    <rect key="frame" x="345" y="6" width="51" height="31"/>
+                                                </switch>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailingMargin" secondItem="hA0-KR-0px" secondAttribute="trailing" id="7kT-xE-Ys9"/>
+                                                <constraint firstItem="hA0-KR-0px" firstAttribute="centerY" secondItem="oi7-0Z-po5" secondAttribute="centerY" id="T6V-lC-aJX"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="A3C-gG-g7z" secondAttribute="bottom" id="Vkm-iL-6r8"/>
+                                                <constraint firstItem="A3C-gG-g7z" firstAttribute="leading" secondItem="oi7-0Z-po5" secondAttribute="leadingMargin" id="oFy-op-j9f"/>
+                                                <constraint firstItem="A3C-gG-g7z" firstAttribute="top" secondItem="oi7-0Z-po5" secondAttribute="topMargin" id="uer-ZI-XdY"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </cells>
@@ -157,10 +175,17 @@
                             <outlet property="delegate" destination="lzI-J1-jKp" id="Qot-RE-AEV"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="nct-Ep-sag"/>
+                    <navigationItem key="navigationItem" id="nct-Ep-sag">
+                        <barButtonItem key="rightBarButtonItem" title="Сохранить" id="Fmx-Fn-6VA">
+                            <connections>
+                                <action selector="saveTask:" destination="lzI-J1-jKp" id="bjY-kS-NB0"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="labelTaskPriority" destination="jzK-u0-C1i" id="EgH-AT-KbD"/>
                         <outlet property="labelTitleTask" destination="3v7-YJ-wSq" id="S8O-80-fA1"/>
+                        <outlet property="taskStatusSwitch" destination="hA0-KR-0px" id="W2R-xr-Cpe"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="A0z-F0-U7i" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

@@ -64,6 +64,19 @@ class TaskListControllerUITableView: UITableViewController {
         return resultLabel
     }
     
+    // MARK: - Segue Prepare
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toCreateScreen" {
+            let destination = segue.destination as! TaskEdit_TableViewController
+            destination.doAfterEdit = { [unowned self] title, priority, status in
+                let newTask = OneTask(title: title, priority: priority, status: status)
+                tasksList[priority]?.append(newTask) //добавить в словарь tasksList, новую задачу newTask по ключу priority.
+                tableView.reloadData()
+            }
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -132,13 +145,53 @@ class TaskListControllerUITableView: UITableViewController {
     override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         guard let _ = tasksList[getTaskPriority]?[indexPath.row] else { return nil }
-        guard tasksList[getTaskPriority]![indexPath.row].status == .completed else { return nil }
+        //guard tasksList[getTaskPriority]![indexPath.row].status == .completed else { return nil }
         
+        //действие для изм статуса на Запланирована
         let actionSwipeInstance = UIContextualAction(style: .normal, title: "Не выполнена") { _, _, _ in
             self.tasksList[getTaskPriority]![indexPath.row].status = .planned
             self.tableView.reloadSections(IndexSet(arrayLiteral: indexPath.section), with: .automatic)
         }
-        return UISwipeActionsConfiguration(actions: [actionSwipeInstance])
+        
+        //действие для перехода к экрану редактирования
+        let actionEditSwipeInstance = UIContextualAction(style: .normal, title: "Изменить") { _, _, _ in
+            //загрузка сцены со Сториборда
+            let editScreen = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TaskEditScreen") as! TaskEdit_TableViewController
+            //передача значений редактируемой задачи
+            editScreen.taskText = self.tasksList[getTaskPriority]![indexPath.row].title
+            
+            print(self.tasksList[getTaskPriority]!)
+            
+            editScreen.taskPriority = self.tasksList[getTaskPriority]![indexPath.row].priority
+            editScreen.taskStatus = self.tasksList[getTaskPriority]![indexPath.row].status
+            
+            editScreen.doAfterEdit = { [unowned self] title, priority, status in
+                let editTask = OneTask(title: title, priority: priority, status: status)
+                
+                if getTaskPriority == editTask.priority {
+                    tasksList[getTaskPriority]![indexPath.row] = editTask
+                } else {
+                    tasksList[getTaskPriority]!.remove(at: indexPath.row)
+                    tasksList[editTask.priority]?.append(editTask)
+                }
+                
+                tableView.reloadData()
+            }
+            
+            self.navigationController?.pushViewController(editScreen, animated: true)
+        }
+
+        actionEditSwipeInstance.backgroundColor = .darkGray
+        
+        //создаем объект описывающий доступные действия
+        let actionsConfig: UISwipeActionsConfiguration
+        if tasksList[getTaskPriority]![indexPath.row].status == .completed {
+            actionsConfig = UISwipeActionsConfiguration(actions: [actionSwipeInstance, actionEditSwipeInstance])
+        } else {
+            actionsConfig = UISwipeActionsConfiguration(actions: [actionEditSwipeInstance])
+        }
+        
+        return actionsConfig
     }
     
     

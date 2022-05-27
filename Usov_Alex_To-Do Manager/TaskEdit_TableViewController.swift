@@ -13,6 +13,9 @@ class TaskEdit_TableViewController: UITableViewController {
         super.viewDidLoad()
         labelTitleTask?.text = taskText
         labelTaskPriority?.text = namePriorityForTask[taskPriority]
+        if taskStatus == .completed {
+            taskStatusSwitch.isOn = true
+        }
     }
 
     var taskText: String = ""
@@ -23,14 +26,37 @@ class TaskEdit_TableViewController: UITableViewController {
         .normal : "Текущая"
     ]
     
-    var doAfterEdit: ((String, TaskPriority, TaskStatus) -> Void)?
+    var doAfterEdit: ((String, TaskPriority, TaskStatus) -> Void)? // замыкание для передачи данных
     
     @IBOutlet weak var labelTitleTask: UITextField!
     @IBOutlet weak var labelTaskPriority: UILabel!
+    @IBOutlet weak var taskStatusSwitch: UISwitch!
     
     
+    @IBAction func saveTask(_ sender: UIBarButtonItem) {
+        //получаем актуальные значения
+        let title = labelTitleTask?.text ?? ""
+        let priority = taskPriority
+        let status: TaskStatus = taskStatusSwitch.isOn ? .completed : .planned
+        
+        doAfterEdit?(title, priority, status)
+        
+        navigationController?.popViewController(animated: true)
+    }
     
-    
+    // MARK: - Segue Prepare
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toTaskPriorityScreen" {
+            let destination = segue.destination as! PriorityTask_TableViewController
+            destination.selectPriority = taskPriority
+                //определяем действия/логику для замыкания. Само замыкание вызывается в PriorityTask_TableViewController. Таким образом этот контроллер TaskEdit_TableViewController, определяет действие.
+            destination.doAfterPrioritySelected = { [unowned self] selectedPriority in
+                taskPriority = selectedPriority
+                labelTaskPriority.text = namePriorityForTask[taskPriority]
+            }
+        }
+    }
     
     // MARK: - Table view data source
 

@@ -21,11 +21,11 @@ class PriorityTask_TableViewController: UITableViewController {
     
     private var taskPriorityInformation: [PriorityCellDescription] = [
         (priority: .important, title: "Важная", description: "   Такой тип задач является наиболее приоритетным для выполнения. Все важные задачи выводятся в самом верху списка задач."),
-        (priority: .important, title: "Текущая", description: "   Задача с обычным приоритетом.")
+        (priority: .normal, title: "Текущая", description: "   Задача с обычным приоритетом.")
     ]
     
     var selectPriority: TaskPriority = .normal
-    
+    var doAfterPrioritySelected: ((TaskPriority) -> Void)?
     
     // MARK: - Table view data source
 
@@ -43,10 +43,9 @@ class PriorityTask_TableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellNibID, for: indexPath) as! CellPriorityTask
         
         let priorityDescription = taskPriorityInformation[indexPath.row]
-        
         cell.labelPriorityTitle.text = priorityDescription.title
         cell.labelDescriptionPriority.text = priorityDescription.description
-        
+
         if selectPriority == priorityDescription.priority {
             cell.accessoryType = .checkmark
         } else {
@@ -56,7 +55,12 @@ class PriorityTask_TableViewController: UITableViewController {
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
+        let selectPriority = taskPriorityInformation[indexPath.row].priority
+        doAfterPrioritySelected?(selectPriority) //передаем выбранный приоритет задачи в замыкание.
+        navigationController?.popViewController(animated: true)
+    }
     /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
