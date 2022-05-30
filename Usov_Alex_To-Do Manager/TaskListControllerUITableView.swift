@@ -39,7 +39,8 @@ class TaskListControllerUITableView: UITableViewController {
     
     
     var sectionsPositionForPriorityTask: [TaskPriority] = [.important, .normal] //для секции в таблице
-    var cellID = "taskCellid"
+    let cellID = "taskCellid"
+    let cellidForEmptyTask = "CellForEmptyTask"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -97,15 +98,32 @@ class TaskListControllerUITableView: UITableViewController {
         guard let getCurrentTasksPriority = tasksList[getTaskPriorityOutSection] else {
             return 0
         }
-        return getCurrentTasksPriority.count
+        if getCurrentTasksPriority.isEmpty {
+            print("empty array")
+            return 1
+        } else {
+            print("Tasks exist")
+            return getCurrentTasksPriority.count
+        }
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! TaskCellPrototype
-
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        
+        if tasksList[getTaskPriority]!.isEmpty {
+            let cellForEmptyTask = UITableViewCell(style: .default, reuseIdentifier: cellidForEmptyTask)
+            var config = cellForEmptyTask.defaultContentConfiguration()
+            config.text = "список задач пуст"
+            config.textProperties.color = UIColor(named: "taskPlanedColor")!
+            cellForEmptyTask.contentConfiguration = config
+            return cellForEmptyTask
+        }
+        
+        
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! TaskCellPrototype
+        
         
         guard let getCurrentTask = tasksList[getTaskPriority]?[indexPath.row]
         else {
@@ -141,6 +159,10 @@ class TaskListControllerUITableView: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        if tasksList[getTaskPriority]!.isEmpty {
+            tableView.deselectRow(at: indexPath, animated: true)
+          return
+        }
         //проверка наличия задачи
         guard let _ = tasksList[getTaskPriority]?[indexPath.row] else { return }
 
@@ -204,7 +226,13 @@ class TaskListControllerUITableView: UITableViewController {
         return actionsConfig
     }
 
-
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        if tasksList[getTaskPriority]!.isEmpty {
+          return false
+        }
+        return true
+    }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
