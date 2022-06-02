@@ -36,7 +36,7 @@ class TaskEdit_TableViewController: UITableViewController {
     @IBAction func saveTask(_ sender: UIBarButtonItem) {
         //получаем актуальные значения
         
-        if labelTitleTask.text?.trimmingCharacters(in: .whitespaces) == "" {
+        if labelTitleTask.text?.trimmingCharacters(in: .whitespaces) == "" { //очистка строки от пробелов в начале
             let alert = UIAlertController (title: "Задача не Сохранена", message: "Название задачи отсутствует", preferredStyle: .alert)
             let action = UIAlertAction(title: "Ok", style: .default) { _ in
                 self.navigationController?.popViewController(animated: true)
@@ -82,7 +82,7 @@ class TaskEdit_TableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 2 {
-            tableView.deselectRow(at: indexPath, animated: true)
+            tableView.deselectRow(at: indexPath, animated: true) //снять выделение строки со строки Задача выполнена
         }
     }
     

@@ -22,13 +22,6 @@ class TaskListControllerUITableView: UITableViewController {
                     return taskFirstPosition < taskNextPosition
                    
                 }
-                
-//                if tasksList[keyDictionary]!.isEmpty {
-//                    let noneTask = OneTask(title: "Задач нет", priority: .normal, status: .planned)
-//                    tasksList[keyDictionary]?.insert(noneTask, at: 0)
-//                    print(tasksList)
-//                }
-                
                 //данный метод не подходит так как сортировка происходит на основе Модели Task. А сортировка это Вид. А вид и модель не должны быть связанны.
                 //tasksList[keyDictionary] = tasksGroup.sorted { $0.status.rawValue < $1.status.rawValue }
             }
@@ -39,7 +32,8 @@ class TaskListControllerUITableView: UITableViewController {
     
     
     var sectionsPositionForPriorityTask: [TaskPriority] = [.important, .normal] //для секции в таблице
-    var cellID = "taskCellid"
+    let cellID = "taskCellid"
+    let cellidForEmptyTask = "CellForEmptyTask"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,7 +81,8 @@ class TaskListControllerUITableView: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return tasksList.count //количество секций равно количеству элементов словаре
+        return 2
+        //return tasksList.count //количество секций равно количеству элементов словаре
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -97,15 +92,27 @@ class TaskListControllerUITableView: UITableViewController {
         guard let getCurrentTasksPriority = tasksList[getTaskPriorityOutSection] else {
             return 0
         }
-        return getCurrentTasksPriority.count
+        if getCurrentTasksPriority.isEmpty {
+            return 1
+        } else {
+            return getCurrentTasksPriority.count
+        }
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! TaskCellPrototype
-
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        
+        if tasksList[getTaskPriority]!.isEmpty {
+            let cellForEmptyTask = UITableViewCell(style: .default, reuseIdentifier: cellidForEmptyTask)
+            var config = cellForEmptyTask.defaultContentConfiguration()
+            config.text = "список задач пуст"
+            config.textProperties.color = UIColor(named: "taskPlanedColor")!
+            cellForEmptyTask.contentConfiguration = config
+            return cellForEmptyTask
+        }
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! TaskCellPrototype
         
         guard let getCurrentTask = tasksList[getTaskPriority]?[indexPath.row]
         else {
@@ -141,6 +148,10 @@ class TaskListControllerUITableView: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        if tasksList[getTaskPriority]!.isEmpty {
+            tableView.deselectRow(at: indexPath, animated: true)
+          return
+        }
         //проверка наличия задачи
         guard let _ = tasksList[getTaskPriority]?[indexPath.row] else { return }
 
@@ -200,18 +211,27 @@ class TaskListControllerUITableView: UITableViewController {
         } else {
             actionsConfig = UISwipeActionsConfiguration(actions: [actionEditSwipeInstance])
         }
-
         return actionsConfig
     }
 
-
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        if tasksList[getTaskPriority]!.isEmpty {
+            return false // отключить редактирование строки, если задач нет, чтоб не удалить строку с сообщение "список пуст"
+        }
+        return true
+    }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         if editingStyle == .delete {
-            // Delete the row from the data source
+            if indexPath.row == 0 { // если это последняя строка, то ее не удалять, чтоб сошлось количество ячеек в numberOfRowsInSection
+                tasksList[getTaskPriority]?.remove(at: indexPath.row)
+                tableView.reloadData()
+            } else {
             tasksList[getTaskPriority]?.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            }
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
