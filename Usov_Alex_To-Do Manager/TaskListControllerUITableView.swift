@@ -88,7 +88,8 @@ class TaskListControllerUITableView: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return tasksList.count //количество секций равно количеству элементов словаре
+        return 2
+        //return tasksList.count //количество секций равно количеству элементов словаре
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -96,13 +97,14 @@ class TaskListControllerUITableView: UITableViewController {
         let getTaskPriorityOutSection = sectionsPositionForPriorityTask[section]
         //используя полученное значение, как ключ для словаря, получаем массив задач
         guard let getCurrentTasksPriority = tasksList[getTaskPriorityOutSection] else {
+            print("заход в гуард")
             return 0
         }
         if getCurrentTasksPriority.isEmpty {
-            print("empty array")
+            print("empty array \(getCurrentTasksPriority.count) and \(getCurrentTasksPriority)")
             return 1
         } else {
-            print("Tasks exist")
+            print("Tasks exist \(getCurrentTasksPriority)")
             return getCurrentTasksPriority.count
         }
     }
@@ -124,7 +126,7 @@ class TaskListControllerUITableView: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! TaskCellPrototype
         
-        
+        print("indexPath.row \(indexPath.row) and indexPath.section \(indexPath.section)")
         guard let getCurrentTask = tasksList[getTaskPriority]?[indexPath.row]
         else {
             return cell
@@ -222,14 +224,13 @@ class TaskListControllerUITableView: UITableViewController {
         } else {
             actionsConfig = UISwipeActionsConfiguration(actions: [actionEditSwipeInstance])
         }
-
         return actionsConfig
     }
 
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         if tasksList[getTaskPriority]!.isEmpty {
-          return false
+            return false // отключить редактирование строки, если задач нет, чтоб не удалить строку с сообщение "список пуст"
         }
         return true
     }
@@ -237,9 +238,13 @@ class TaskListControllerUITableView: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         if editingStyle == .delete {
-            // Delete the row from the data source
+            if indexPath.row == 0 { // если это последняя строка, то ее не удалять, чтоб сошлось количество ячеек в numberOfRowsInSection
+                tasksList[getTaskPriority]?.remove(at: indexPath.row)
+                tableView.reloadData()
+            } else {
             tasksList[getTaskPriority]?.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
+            }
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
@@ -255,6 +260,7 @@ class TaskListControllerUITableView: UITableViewController {
         guard let movedTask = tasksList[startPositionTaskPriority]?[startIndexPath.row] else { return }
         // удаляем задачу из стартовой строки
         tasksList[startPositionTaskPriority]!.remove(at: startIndexPath.row)
+        print("finishIndexPath.row \(finishIndexPath.row)")
         tasksList[finishPositionTaskPriority]!.insert(movedTask, at: finishIndexPath.row)
 
         if startPositionTaskPriority != finishPositionTaskPriority {
