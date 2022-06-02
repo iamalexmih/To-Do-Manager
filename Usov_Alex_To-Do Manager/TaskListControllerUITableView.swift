@@ -22,13 +22,6 @@ class TaskListControllerUITableView: UITableViewController {
                     return taskFirstPosition < taskNextPosition
                    
                 }
-                
-//                if tasksList[keyDictionary]!.isEmpty {
-//                    let noneTask = OneTask(title: "Задач нет", priority: .normal, status: .planned)
-//                    tasksList[keyDictionary]?.insert(noneTask, at: 0)
-//                    print(tasksList)
-//                }
-                
                 //данный метод не подходит так как сортировка происходит на основе Модели Task. А сортировка это Вид. А вид и модель не должны быть связанны.
                 //tasksList[keyDictionary] = tasksGroup.sorted { $0.status.rawValue < $1.status.rawValue }
             }
@@ -97,14 +90,11 @@ class TaskListControllerUITableView: UITableViewController {
         let getTaskPriorityOutSection = sectionsPositionForPriorityTask[section]
         //используя полученное значение, как ключ для словаря, получаем массив задач
         guard let getCurrentTasksPriority = tasksList[getTaskPriorityOutSection] else {
-            print("заход в гуард")
             return 0
         }
         if getCurrentTasksPriority.isEmpty {
-            print("empty array \(getCurrentTasksPriority.count) and \(getCurrentTasksPriority)")
             return 1
         } else {
-            print("Tasks exist \(getCurrentTasksPriority)")
             return getCurrentTasksPriority.count
         }
     }
@@ -122,11 +112,8 @@ class TaskListControllerUITableView: UITableViewController {
             return cellForEmptyTask
         }
         
-        
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath) as! TaskCellPrototype
         
-        print("indexPath.row \(indexPath.row) and indexPath.section \(indexPath.section)")
         guard let getCurrentTask = tasksList[getTaskPriority]?[indexPath.row]
         else {
             return cell
@@ -260,7 +247,6 @@ class TaskListControllerUITableView: UITableViewController {
         guard let movedTask = tasksList[startPositionTaskPriority]?[startIndexPath.row] else { return }
         // удаляем задачу из стартовой строки
         tasksList[startPositionTaskPriority]!.remove(at: startIndexPath.row)
-        print("finishIndexPath.row \(finishIndexPath.row)")
         tasksList[finishPositionTaskPriority]!.insert(movedTask, at: finishIndexPath.row)
 
         if startPositionTaskPriority != finishPositionTaskPriority {
