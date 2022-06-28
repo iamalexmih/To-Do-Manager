@@ -13,6 +13,8 @@ class TaskListControllerUITableView: UITableViewController {
     var tasksList: [TaskPriority : [TaskModelProtokol]] = [:] {// Актуальный список задач
         didSet {
             //сортировка массива
+            var savingArray: [TaskModelProtokol] = []
+            
             for (keyDictionary, tasksGroup) in tasksList {
                 tasksList[keyDictionary] = tasksGroup.sorted { taskFirst, taskNext in
                     let tasksStatusPosition: [TaskStatus] = [.planned, .completed]
@@ -24,8 +26,9 @@ class TaskListControllerUITableView: UITableViewController {
                 }
                 //данный метод не подходит так как сортировка происходит на основе Модели Task. А сортировка это Вид. А вид и модель не должны быть связанны.
                 //tasksList[keyDictionary] = tasksGroup.sorted { $0.status.rawValue < $1.status.rawValue }
+                savingArray += tasksGroup
             }
-            
+            tasksStorage.saveTasks(savingArray)
             
         }
     }
@@ -44,10 +47,12 @@ class TaskListControllerUITableView: UITableViewController {
     private func loadBaseTasks() {
         sectionsPositionForPriorityTask.forEach { taskPriority in
             tasksList[taskPriority] = []
+            // создаем пустой массив для каждого ключа
         }
         
         tasksStorage.loadTasks().forEach { task in
             tasksList[task.priority]?.append(task)
+            //tasksList[task.priority] используя ключ (task.priority) для словаря tasksList, получаем массив, поэтому append.
         }
     }
     
@@ -71,6 +76,8 @@ class TaskListControllerUITableView: UITableViewController {
         if segue.identifier == "toCreateScreen" {
             let destination = segue.destination as! TaskEdit_TableViewController
             destination.doAfterEdit = { [unowned self] title, priority, status in
+                //замыкание будет вызвано после того как будет сохранена задача!
+                //print("doAfterEdit")
                 let newTask = OneTask(title: title, priority: priority, status: status)
                 tasksList[priority]?.append(newTask) //добавить в словарь tasksList, новую задачу newTask по ключу priority.
                 tableView.reloadData()

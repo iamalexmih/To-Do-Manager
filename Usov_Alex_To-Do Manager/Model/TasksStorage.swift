@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import UIKit
+import CoreData
 
 protocol TasksStorageProtocol {
     func loadTasks() -> [TaskModelProtokol]
@@ -30,7 +32,34 @@ class TasksStorage: TasksStorageProtocol {
         
     }
     
+    func loadTasksCOreData() -> [TaskModelProtokol] {
+        var tasksListExtractCoreData: [TaskModelProtokol] = []
+    
+    
+        return tasksListExtractCoreData
+    }
+    
+    
     func saveTasks(_ tasks: [TaskModelProtokol]) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
         
+        guard let entityTask = NSEntityDescription.entity(forEntityName: "TasksCoreData", in: context)
+        else { return print("данные не сохранены") }
+        
+        let taskObject = TasksCoreData(entity: entityTask, insertInto: context)
+        
+        tasks.forEach { taskOne in
+            taskObject.title = taskOne.title
+            taskObject.priority = (taskOne.priority == .important) ? "important" : "normal"
+            taskObject.status = (taskOne.status == .planned) ? "planned" : "completed"
+            
+            do {
+                try context.save()
+                print("сохранение title = \(taskObject.title!)")
+            } catch let error as NSError {
+                print(error.localizedDescription)
+            }
+        }
     }
 }
