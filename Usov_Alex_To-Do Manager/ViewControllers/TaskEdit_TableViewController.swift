@@ -8,16 +8,6 @@
 import UIKit
 
 class TaskEdit_TableViewController: UITableViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        labelTitleTask?.text = taskText
-        labelTaskPriority?.text = namePriorityForTask[taskPriority]
-        if taskStatus == .completed {
-            taskStatusSwitch.isOn = true
-        }
-    }
-
     var taskText: String = ""
     var taskPriority: TaskPriority = .normal
     var taskStatus: TaskStatus = .planned
@@ -31,6 +21,23 @@ class TaskEdit_TableViewController: UITableViewController {
     @IBOutlet weak var labelTitleTask: UITextField!
     @IBOutlet weak var labelTaskPriority: UILabel!
     @IBOutlet weak var taskStatusSwitch: UISwitch!
+    
+    func setupForEditAction(tasksList: [TaskPriority : [TaskModelProtokol]], getTaskPriority: TaskPriority, indexPath: IndexPath) {
+        taskText = tasksList[getTaskPriority]![indexPath.row].title
+        taskPriority = tasksList[getTaskPriority]![indexPath.row].priority
+        taskStatus = tasksList[getTaskPriority]![indexPath.row].status
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        labelTitleTask?.text = taskText
+        labelTaskPriority?.text = namePriorityForTask[taskPriority]
+        if taskStatus == .completed {
+            taskStatusSwitch.isOn = true
+        }
+    }
+
+
     
     
     @IBAction func saveTask(_ sender: UIBarButtonItem) {
