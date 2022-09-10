@@ -11,21 +11,26 @@ class TaskEdit_TableViewController: UITableViewController {
     var taskText: String = ""
     var taskPriority: TaskPriority = .normal
     var taskStatus: TaskStatus = .planned
+    var idTask: UUID?
     var namePriorityForTask: [TaskPriority : String] = [
         .important : "Важная",
         .normal : "Текущая"
     ]
     
-    var doAfterEdit: ((String, TaskPriority, TaskStatus) -> Void)? // замыкание для передачи данных
+    
+    var doAfterEdit: ((String, TaskPriority, TaskStatus, UUID) -> Void)? // замыкание для передачи данных
     
     @IBOutlet weak var labelTitleTask: UITextField!
     @IBOutlet weak var labelTaskPriority: UILabel!
     @IBOutlet weak var taskStatusSwitch: UISwitch!
     
-    func setupForEditAction(tasksList: [TaskPriority : [TaskModelProtokol]], getTaskPriority: TaskPriority, indexPath: IndexPath) {
+    func setupForEditAction(tasksList: [TaskPriority : [TaskModelProtokol]],
+                            getTaskPriority: TaskPriority,
+                            indexPath: IndexPath) {
         taskText = tasksList[getTaskPriority]![indexPath.row].title
         taskPriority = tasksList[getTaskPriority]![indexPath.row].priority
         taskStatus = tasksList[getTaskPriority]![indexPath.row].status
+        idTask = tasksList[getTaskPriority]![indexPath.row].id
     }
     
     override func viewDidLoad() {
@@ -56,8 +61,8 @@ class TaskEdit_TableViewController: UITableViewController {
             let title = labelTitleTask?.text ?? ""
             let priority = taskPriority
             let status: TaskStatus = taskStatusSwitch.isOn ? .completed : .planned
-            
-            doAfterEdit?(title, priority, status)
+            let id: UUID = idTask ?? UUID()
+            doAfterEdit?(title, priority, status, id)
             
             navigationController?.popViewController(animated: true)
         }

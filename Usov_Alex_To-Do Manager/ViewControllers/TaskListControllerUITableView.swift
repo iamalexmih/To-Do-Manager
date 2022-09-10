@@ -2,29 +2,7 @@ import UIKit
 
 class TaskListControllerUITableView: UITableViewController {
 
-    var savingArray: [TaskModelProtokol] = []
-    var tasksList: [TaskPriority : [TaskModelProtokol]] = [:] {// Актуальный список задач
-        didSet {
-            //сортировка массива
-            //var savingArray: [TaskModelProtokol] = []
-            
-            for (keyDictionary, tasksGroup) in tasksList {
-                tasksList[keyDictionary] = tasksGroup.sorted { taskFirst, taskNext in
-                    let tasksStatusPosition: [TaskStatus] = [.planned, .completed]
-                    let taskFirstPosition = tasksStatusPosition.firstIndex(of: taskFirst.status) ?? 0
-                    let taskNextPosition = tasksStatusPosition.firstIndex(of: taskNext.status) ?? 0
-
-                    return taskFirstPosition < taskNextPosition
-                   
-                }
-                //данный метод не подходит так как сортировка происходит на основе Модели Task. А сортировка это Вид. А вид и модель не должны быть связанны.
-                //tasksList[keyDictionary] = tasksGroup.sorted { $0.status.rawValue < $1.status.rawValue }
-                savingArray += tasksGroup
-            }
-        }
-    }
-
-    
+    var tasksList: [TaskPriority : [TaskModelProtokol]] = [:] // Актуальный список задач
     var sectionsPositionForPriorityTask: [TaskPriority] = [.important, .normal] //для секции в таблице
     let cellID = "taskCellid"
     let cellidForEmptyTask = "CellForEmptyTask"
@@ -33,6 +11,7 @@ class TaskListControllerUITableView: UITableViewController {
         super.viewDidLoad()
         loadBaseTasks()
         navigationItem.leftBarButtonItem = editButtonItem
+        sortingTasks()
     }
     
     // MARK: - CoreData Load
@@ -52,12 +31,12 @@ class TaskListControllerUITableView: UITableViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toCreateScreen" {
             let destination = segue.destination as! TaskEdit_TableViewController
-            destination.doAfterEdit = { [unowned self] title, priority, status in
+            destination.doAfterEdit = { [unowned self] title, priority, status, id in
                 //замыкание будет вызвано после того как будет сохранена задача!
-                print("doAfterEdit")
-                let newTask = OneTask(title: title, priority: priority, status: status)
+                let newTask = OneTask(title: title, priority: priority, status: status, id: id)
                 tasksList[priority]?.append(newTask) //добавить в словарь tasksList, новую задачу newTask по ключу priority.
                 CoreDataManager.shared.saveTask(newTask: newTask)
+                sortingTasks()
                 tableView.reloadData()
             }
         }
@@ -115,7 +94,9 @@ class TaskListControllerUITableView: UITableViewController {
         }
         //проверка наличия задачи
         guard let _ = tasksList[getTaskPriority]?[indexPath.row] else { return }
-
+        
+        //TODO: - Update CoreData после смены Статуса задачи
+        
         guard tasksList[getTaskPriority]![indexPath.row].status == .planned else {
             //снимаем выделение строки
             tableView.deselectRow(at: indexPath, animated: true)
@@ -124,6 +105,8 @@ class TaskListControllerUITableView: UITableViewController {
 
         //Отмечаем задачу как выполненную
         tasksList[getTaskPriority]![indexPath.row].status = .completed
+        CoreDataManager.shared.updateTaskInContext(task: tasksList[getTaskPriority]![indexPath.row])
+        sortingTasks()
         tableView.reloadSections(IndexSet(arrayLiteral: indexPath.section), with: .automatic)
     }
     
@@ -136,6 +119,8 @@ class TaskListControllerUITableView: UITableViewController {
         let actionSwipeInstance = UIContextualAction(style: .normal, title: "Не выполнена") { [weak self] _, _, _ in
             guard let self = self else { return }
             self.tasksList[getTaskPriority]![indexPath.row].status = .planned
+            CoreDataManager.shared.updateTaskInContext(task: self.tasksList[getTaskPriority]![indexPath.row])
+            self.sortingTasks()
             self.tableView.reloadSections(IndexSet(arrayLiteral: indexPath.section), with: .automatic)
         }
 
@@ -148,13 +133,14 @@ class TaskListControllerUITableView: UITableViewController {
             editScreen.setupForEditAction(tasksList: self.tasksList,
                                           getTaskPriority: getTaskPriority,
                                           indexPath: indexPath)
-
-            editScreen.doAfterEdit = { title, priority, status in
+            
+            editScreen.doAfterEdit = { title, priority, status, id in
                 self.afterEditAction(title: title,
-                                priority: priority,
-                                status: status,
-                                getTaskPriority: getTaskPriority,
-                                indexPath: indexPath)
+                                     priority: priority,
+                                     status: status,
+                                     id: id,
+                                     getTaskPriority: getTaskPriority,
+                                     indexPath: indexPath)
                 tableView.reloadData()
             }
             self.navigationController?.pushViewController(editScreen, animated: true)
@@ -186,13 +172,16 @@ class TaskListControllerUITableView: UITableViewController {
                             commit editingStyle: UITableViewCell.EditingStyle,
                             forRowAt indexPath: IndexPath) {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
+        let task = tasksList[getTaskPriority]![indexPath.row]
         if editingStyle == .delete {
             if indexPath.row == 0 { // если это последняя строка, то ее не удалять, чтоб сошлось количество ячеек в numberOfRowsInSection
                 tasksList[getTaskPriority]?.remove(at: indexPath.row)
                 tableView.reloadData()
+                CoreDataManager.shared.deleteNote(id: task.id)
             } else {
-            tasksList[getTaskPriority]?.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
+                tasksList[getTaskPriority]?.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .fade)
+                CoreDataManager.shared.deleteNote(id: task.id)
             }
         }
     }
@@ -220,15 +209,18 @@ class TaskListControllerUITableView: UITableViewController {
     private func afterEditAction (title: String,
                                   priority: TaskPriority,
                                   status: TaskStatus,
+                                  id: UUID,
                                   getTaskPriority: TaskPriority,
                                   indexPath: IndexPath) {
-        let editTask = OneTask(title: title, priority: priority, status: status)
+        let editTask = OneTask(title: title, priority: priority, status: status, id: id)
         if getTaskPriority == editTask.priority {
             tasksList[getTaskPriority]![indexPath.row] = editTask
         } else {
             tasksList[getTaskPriority]!.remove(at: indexPath.row)
             tasksList[editTask.priority]?.append(editTask)
         }
+        CoreDataManager.shared.updateTaskInContext(task: editTask)
+        sortingTasks()
     }
     
     private func createEmptyCell() -> UITableViewCell {
@@ -238,5 +230,17 @@ class TaskListControllerUITableView: UITableViewController {
         config.textProperties.color = UIColor(named: "taskPlanedColor")!
         cellForEmptyTask.contentConfiguration = config
         return cellForEmptyTask
+    }
+    
+    private func sortingTasks() {
+        for (keyDictionary, tasksGroup) in tasksList {
+            tasksList[keyDictionary] = tasksGroup.sorted { taskFirst, taskNext in
+                let tasksStatusPosition: [TaskStatus] = [.planned, .completed]
+                let taskFirstPosition = tasksStatusPosition.firstIndex(of: taskFirst.status) ?? 0
+                let taskNextPosition = tasksStatusPosition.firstIndex(of: taskNext.status) ?? 0
+                
+                return taskFirstPosition < taskNextPosition
+            }
+        }
     }
 }

@@ -22,10 +22,12 @@ protocol TaskModelProtokol {
     var title: String {get set}
     var priority: TaskPriority {get set}
     var status: TaskStatus {get set}
+    var id: UUID {get set}
 }
 
 struct OneTask: TaskModelProtokol {
     var title: String
     var priority: TaskPriority
     var status: TaskStatus
+    var id = UUID()
 }
