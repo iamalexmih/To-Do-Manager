@@ -14,6 +14,6 @@
 
 
 <p align="center">
-<img src="https://github.com/iamalexmih/CryptoMonitor/blob/main/Screenshot/screenshots%20main%20screen%20App.png" 
-alt="screenshots main Screen App" width="300" />
+<img src="https://github.com/iamalexmih/To-Do-Manager/blob/main/Usov_Alex_To-Do%20Manager/screenShots/screen1.png" 
+alt="screenshots main Screen App" width="1000" />
 </p>
