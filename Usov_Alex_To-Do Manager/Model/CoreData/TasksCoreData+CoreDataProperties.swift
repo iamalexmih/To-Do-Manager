@@ -1,12 +1,3 @@
-//
-//  TasksCoreData+CoreDataProperties.swift
-//  Usov_Alex_To-Do Manager
-//
-//  Created by Алексей Попроцкий on 09.09.2022.
-//
-//
-
-import Foundation
 import CoreData
 
 

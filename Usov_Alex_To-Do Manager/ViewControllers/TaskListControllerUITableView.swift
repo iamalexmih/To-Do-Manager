@@ -2,7 +2,7 @@ import UIKit
 
 class TaskListControllerUITableView: UITableViewController {
 
-    var tasksList: [TaskPriority : [TaskModelProtokol]] = [:] // Актуальный список задач
+    var tasksList: [TaskPriority : [TaskModelProtocol]] = [:] // Актуальный список задач
     var sectionsPositionForPriorityTask: [TaskPriority] = [.important, .normal] //для секции в таблице
     let cellID = "taskCellid"
     let cellidForEmptyTask = "CellForEmptyTask"
@@ -62,6 +62,7 @@ class TaskListControllerUITableView: UITableViewController {
     }
 
     
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let getPriorityTask = sectionsPositionForPriorityTask[indexPath.section]
         let arrayTasksInSectionPriority = tasksList[getPriorityTask]!
@@ -81,9 +82,11 @@ class TaskListControllerUITableView: UITableViewController {
     }
 
     
+    
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return (sectionsPositionForPriorityTask[section] == .important) ? "Важные" : "Все задачи"
     }
+    
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -92,18 +95,11 @@ class TaskListControllerUITableView: UITableViewController {
             tableView.deselectRow(at: indexPath, animated: true)
           return
         }
-        //проверка наличия задачи
         guard let _ = tasksList[getTaskPriority]?[indexPath.row] else { return }
-        
-        //TODO: - Update CoreData после смены Статуса задачи
-        
         guard tasksList[getTaskPriority]![indexPath.row].status == .planned else {
-            //снимаем выделение строки
             tableView.deselectRow(at: indexPath, animated: true)
             return
         }
-
-        //Отмечаем задачу как выполненную
         tasksList[getTaskPriority]![indexPath.row].status = .completed
         CoreDataManager.shared.updateTaskInContext(task: tasksList[getTaskPriority]![indexPath.row])
         sortingTasks()
@@ -114,8 +110,6 @@ class TaskListControllerUITableView: UITableViewController {
                             leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         guard let _ = tasksList[getTaskPriority]?[indexPath.row] else { return nil }
-
-        //действие для изм статуса на Запланирована
         let actionSwipeInstance = UIContextualAction(style: .normal, title: "Не выполнена") { [weak self] _, _, _ in
             guard let self = self else { return }
             self.tasksList[getTaskPriority]![indexPath.row].status = .planned
@@ -123,13 +117,9 @@ class TaskListControllerUITableView: UITableViewController {
             self.sortingTasks()
             self.tableView.reloadSections(IndexSet(arrayLiteral: indexPath.section), with: .automatic)
         }
-
-        //действие для перехода к экрану редактирования
         let actionEditSwipeInstance = UIContextualAction(style: .normal, title: "Изменить") { [weak self] _, _, _ in
             guard let self = self else { return }
-            //загрузка сцены со Сториборда
             let editScreen = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TaskEditScreen") as! TaskEdit_TableViewController
-            //передача значений редактируемой задачи
             editScreen.setupForEditAction(tasksList: self.tasksList,
                                           getTaskPriority: getTaskPriority,
                                           indexPath: indexPath)
@@ -148,7 +138,6 @@ class TaskListControllerUITableView: UITableViewController {
 
         actionEditSwipeInstance.backgroundColor = .gray
 
-        //создаем объект описывающий доступные действия
         let actionsConfig: UISwipeActionsConfiguration
         if tasksList[getTaskPriority]![indexPath.row].status == .completed {
             actionsConfig = UISwipeActionsConfiguration(actions: [actionSwipeInstance, actionEditSwipeInstance])
@@ -158,7 +147,8 @@ class TaskListControllerUITableView: UITableViewController {
         return actionsConfig
     }
 
-    // Метод разрешить/запретить редактировать таблицу
+    
+    
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         if tasksList[getTaskPriority]!.isEmpty {
@@ -167,7 +157,8 @@ class TaskListControllerUITableView: UITableViewController {
         return true
     }
     
-    //метод удаления данных с таблицы
+    
+    
     override func tableView(_ tableView: UITableView,
                             commit editingStyle: UITableViewCell.EditingStyle,
                             forRowAt indexPath: IndexPath) {
@@ -186,21 +177,21 @@ class TaskListControllerUITableView: UITableViewController {
         }
     }
     
-    //метод перемещения данных между рядами.
+
+    
     override func tableView(_ tableView: UITableView, moveRowAt startIndexPath: IndexPath, to finishIndexPath: IndexPath) {
-        //получаем секция из которой происходит перемещение
         let startPositionTaskPriority = sectionsPositionForPriorityTask[startIndexPath.section]
-        //секция К которой происходит перемещение
         let finishPositionTaskPriority = sectionsPositionForPriorityTask[finishIndexPath.section]
 
         guard let movedTask = tasksList[startPositionTaskPriority]?[startIndexPath.row] else { return }
-        // удаляем задачу из стартовой строки
         tasksList[startPositionTaskPriority]!.remove(at: startIndexPath.row)
         tasksList[finishPositionTaskPriority]!.insert(movedTask, at: finishIndexPath.row)
 
         if startPositionTaskPriority != finishPositionTaskPriority {
             tasksList[finishPositionTaskPriority]![finishIndexPath.row].priority = finishPositionTaskPriority
+            CoreDataManager.shared.updateTaskInContext(task: tasksList[finishPositionTaskPriority]![finishIndexPath.row])
         }
+        sortingTasks()
         tableView.reloadData()
     }
     
@@ -223,14 +214,19 @@ class TaskListControllerUITableView: UITableViewController {
         sortingTasks()
     }
     
+    
+    
     private func createEmptyCell() -> UITableViewCell {
         let cellForEmptyTask = UITableViewCell(style: .default, reuseIdentifier: cellidForEmptyTask)
         var config = cellForEmptyTask.defaultContentConfiguration()
         config.text = "список задач пуст"
         config.textProperties.color = UIColor(named: "taskPlanedColor")!
         cellForEmptyTask.contentConfiguration = config
+        
         return cellForEmptyTask
     }
+    
+    
     
     private func sortingTasks() {
         for (keyDictionary, tasksGroup) in tasksList {

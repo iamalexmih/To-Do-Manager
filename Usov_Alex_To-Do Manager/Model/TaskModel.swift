@@ -1,10 +1,3 @@
-//
-//  TaskModel.swift
-//  Usov_Alex_To-Do Manager
-//
-//  Created by Алексей Попроцкий on 25.05.2022.
-//
-
 import Foundation
 
 
@@ -13,19 +6,19 @@ enum TaskPriority {
     case important
 }
 
-enum TaskStatus: Int { //Int это связанное значение rawValue, первый элемент будет 0, второй 1. Будем использовать для сортировки задач
+enum TaskStatus: Int {
     case planned
     case completed
 }
 
-protocol TaskModelProtokol {
+protocol TaskModelProtocol {
     var title: String {get set}
     var priority: TaskPriority {get set}
     var status: TaskStatus {get set}
     var id: UUID {get set}
 }
 
-struct OneTask: TaskModelProtokol {
+struct OneTask: TaskModelProtocol {
     var title: String
     var priority: TaskPriority
     var status: TaskStatus

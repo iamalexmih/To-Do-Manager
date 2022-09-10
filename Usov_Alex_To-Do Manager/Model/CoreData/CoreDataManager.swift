@@ -1,5 +1,3 @@
-
-import Foundation
 import CoreData
 
 
@@ -33,7 +31,6 @@ class CoreDataManager {
             } catch {
                 print("An error occurred while save: \(error.localizedDescription)")
             }
-            
         }
     }
 }
@@ -41,7 +38,7 @@ class CoreDataManager {
 // MARK: - Helpers functions
 
 extension CoreDataManager {
-    func saveTask(newTask: TaskModelProtokol) {
+    func saveTask(newTask: TaskModelProtocol) {
         let taskCoreData = TasksCoreData(context: viewContext)
     
         taskCoreData.title = newTask.title
@@ -53,10 +50,11 @@ extension CoreDataManager {
     }
 
 
-    func fetchTask(filter: String? = nil) -> [TaskModelProtokol] {
+    func fetchTask(filter: String? = nil) -> [TaskModelProtocol] {
         return convertCoreDataToTaskModel(arrayCoreData: loadDataCoreData())
     }
 
+    
     
     func loadDataCoreData(id: UUID? = nil) -> [TasksCoreData] {
         let request: NSFetchRequest<TasksCoreData> = TasksCoreData.fetchRequest()
@@ -87,7 +85,9 @@ extension CoreDataManager {
         print(#function)
     }
     
-    func updateTaskInContext(task: TaskModelProtokol) {
+    
+    
+    func updateTaskInContext(task: TaskModelProtocol) {
         let fetchObject = loadDataCoreData(id: task.id)
         let updateObject = fetchObject.first!
         updateObject.title = task.title
@@ -96,9 +96,9 @@ extension CoreDataManager {
         save()
     }
     
-    // MARK: - Helpers function
-    private func convertCoreDataToTaskModel(arrayCoreData: [TasksCoreData]) -> [TaskModelProtokol] {
-        var tasksListExtractCoreData: [TaskModelProtokol] = []
+
+    private func convertCoreDataToTaskModel(arrayCoreData: [TasksCoreData]) -> [TaskModelProtocol] {
+        var tasksListExtractCoreData: [TaskModelProtocol] = []
         if arrayCoreData.isEmpty {
             return tasksListExtractCoreData
         }

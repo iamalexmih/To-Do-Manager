@@ -1,20 +1,13 @@
-//
-//  PriorityTask_TableViewController.swift
-//  Usov_Alex_To-Do Manager
-//
-//  Created by Алексей Попроцкий on 26.05.2022.
-//
-
 import UIKit
 
 class PriorityTask_TableViewController: UITableViewController {
   
-    let cellNibID = "CellPriorityTask" // идентификатор соответсвует имени файла .swift
+    let cellNibID = "CellPriorityTask"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let cellTypeNib = UINib(nibName: cellNibID, bundle: nil)
-        tableView.register(cellTypeNib, forCellReuseIdentifier: cellNibID) //регистрируем ячейку
+        tableView.register(cellTypeNib, forCellReuseIdentifier: cellNibID)
     }
 
     typealias PriorityCellDescription = (priority: TaskPriority, title: String, description: String)
@@ -58,7 +51,7 @@ class PriorityTask_TableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let selectPriority = taskPriorityInformation[indexPath.row].priority
-        doAfterPrioritySelected?(selectPriority) //передаем выбранный приоритет задачи в замыкание.
+        doAfterPrioritySelected?(selectPriority)
         navigationController?.popViewController(animated: true)
     }
     

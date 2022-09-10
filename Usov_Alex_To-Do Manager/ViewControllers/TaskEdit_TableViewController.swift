@@ -1,10 +1,3 @@
-//
-//  TaskEdit_TableViewController.swift
-//  Usov_Alex_To-Do Manager
-//
-//  Created by Алексей Попроцкий on 26.05.2022.
-//
-
 import UIKit
 
 class TaskEdit_TableViewController: UITableViewController {
@@ -17,14 +10,13 @@ class TaskEdit_TableViewController: UITableViewController {
         .normal : "Текущая"
     ]
     
-    
-    var doAfterEdit: ((String, TaskPriority, TaskStatus, UUID) -> Void)? // замыкание для передачи данных
+    var doAfterEdit: ((String, TaskPriority, TaskStatus, UUID) -> Void)?
     
     @IBOutlet weak var labelTitleTask: UITextField!
     @IBOutlet weak var labelTaskPriority: UILabel!
     @IBOutlet weak var taskStatusSwitch: UISwitch!
     
-    func setupForEditAction(tasksList: [TaskPriority : [TaskModelProtokol]],
+    func setupForEditAction(tasksList: [TaskPriority : [TaskModelProtocol]],
                             getTaskPriority: TaskPriority,
                             indexPath: IndexPath) {
         taskText = tasksList[getTaskPriority]![indexPath.row].title
@@ -32,6 +24,8 @@ class TaskEdit_TableViewController: UITableViewController {
         taskStatus = tasksList[getTaskPriority]![indexPath.row].status
         idTask = tasksList[getTaskPriority]![indexPath.row].id
     }
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,37 +38,29 @@ class TaskEdit_TableViewController: UITableViewController {
 
 
     
-    
     @IBAction func saveTask(_ sender: UIBarButtonItem) {
-        //получаем актуальные значения
-        
-        if labelTitleTask.text?.trimmingCharacters(in: .whitespaces) == "" { //очистка строки от пробелов в начале
+        if labelTitleTask.text?.trimmingCharacters(in: .whitespaces) == "" {
             let alert = UIAlertController (title: "Задача не Сохранена", message: "Название задачи отсутствует", preferredStyle: .alert)
             let action = UIAlertAction(title: "Ok", style: .default) { _ in
                 self.navigationController?.popViewController(animated: true)
             }
             alert.addAction(action)
             self.present(alert, animated: true, completion: nil)
-            
         } else {
-            
             let title = labelTitleTask?.text ?? ""
             let priority = taskPriority
             let status: TaskStatus = taskStatusSwitch.isOn ? .completed : .planned
             let id: UUID = idTask ?? UUID()
             doAfterEdit?(title, priority, status, id)
-            
             navigationController?.popViewController(animated: true)
         }
     }
     
     // MARK: - Segue Prepare
-
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "toTaskPriorityScreen" {
             let destination = segue.destination as! PriorityTask_TableViewController
             destination.selectPriority = taskPriority
-                //определяем действия/логику для замыкания. Само замыкание вызывается в PriorityTask_TableViewController. Таким образом этот контроллер TaskEdit_TableViewController, определяет действие.
             destination.doAfterPrioritySelected = { [unowned self] selectedPriority in
                 taskPriority = selectedPriority
                 labelTaskPriority.text = namePriorityForTask[taskPriority]
@@ -94,8 +80,7 @@ class TaskEdit_TableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 2 {
-            tableView.deselectRow(at: indexPath, animated: true) //снять выделение строки со строки Задача выполнена
+            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
-    
 }

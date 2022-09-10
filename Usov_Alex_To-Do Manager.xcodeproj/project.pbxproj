@@ -17,7 +17,6 @@
 		B5857966283E1F480019E170 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5857964283E1F480019E170 /* LaunchScreen.storyboard */; };
 		B585796E283E20070019E170 /* TaskListControllerUITableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585796D283E20070019E170 /* TaskListControllerUITableView.swift */; };
 		B5857971283E21D20019E170 /* TaskModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5857970283E21D20019E170 /* TaskModel.swift */; };
-		B5857973283E23A70019E170 /* tempListTasks.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5857972283E23A70019E170 /* tempListTasks.swift */; };
 		B5857975283E2A840019E170 /* TaskCellPrototype.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5857974283E2A840019E170 /* TaskCellPrototype.swift */; };
 		B5B62110283FBE480042407A /* TaskEdit_TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B6210F283FBE480042407A /* TaskEdit_TableViewController.swift */; };
 		B5B62112283FDE490042407A /* PriorityTask_TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B62111283FDE490042407A /* PriorityTask_TableViewController.swift */; };
@@ -39,7 +38,6 @@
 		B5857967283E1F480019E170 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B585796D283E20070019E170 /* TaskListControllerUITableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListControllerUITableView.swift; sourceTree = "<group>"; };
 		B5857970283E21D20019E170 /* TaskModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskModel.swift; sourceTree = "<group>"; };
-		B5857972283E23A70019E170 /* tempListTasks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tempListTasks.swift; sourceTree = "<group>"; };
 		B5857974283E2A840019E170 /* TaskCellPrototype.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskCellPrototype.swift; sourceTree = "<group>"; };
 		B5B6210F283FBE480042407A /* TaskEdit_TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskEdit_TableViewController.swift; sourceTree = "<group>"; };
 		B5B62111283FDE490042407A /* PriorityTask_TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriorityTask_TableViewController.swift; sourceTree = "<group>"; };
@@ -108,7 +106,6 @@
 				B5857962283E1F480019E170 /* Assets.xcassets */,
 				B5857964283E1F480019E170 /* LaunchScreen.storyboard */,
 				B5857967283E1F480019E170 /* Info.plist */,
-				B5857972283E23A70019E170 /* tempListTasks.swift */,
 			);
 			path = "Usov_Alex_To-Do Manager";
 			sourceTree = "<group>";
@@ -218,7 +215,6 @@
 				B503E6C028CBB822002F598E /* TasksCoreData+CoreDataClass.swift in Sources */,
 				B585795A283E1F470019E170 /* AppDelegate.swift in Sources */,
 				B503E6C128CBB822002F598E /* TasksCoreData+CoreDataProperties.swift in Sources */,
-				B5857973283E23A70019E170 /* tempListTasks.swift in Sources */,
 				B5B621AD284FBD510042407A /* TaskModel.xcdatamodeld in Sources */,
 				B5B62112283FDE490042407A /* PriorityTask_TableViewController.swift in Sources */,
 				B5857971283E21D20019E170 /* TaskModel.swift in Sources */,
