@@ -2,8 +2,8 @@ import UIKit
 
 class TaskListControllerUITableView: UITableViewController {
 
-    var tasksList: [TaskPriority : [TaskModelProtocol]] = [:] // Актуальный список задач
-    var sectionsPositionForPriorityTask: [TaskPriority] = [.important, .normal] //для секции в таблице
+    var tasksList: [TaskPriority : [TaskModelProtocol]] = [:]
+    var sectionsPositionForPriorityTask: [TaskPriority] = [.important, .normal]
     let cellID = "taskCellid"
     let cellidForEmptyTask = "CellForEmptyTask"
     
@@ -23,7 +23,6 @@ class TaskListControllerUITableView: UITableViewController {
         let arrayCoreData = CoreDataManager.shared.fetchTask()
         arrayCoreData.forEach { task in
             tasksList[task.priority]?.append(task)
-            //tasksList[task.priority] используя ключ (task.priority) для словаря tasksList, получаем массив, поэтому append.
         }
     }
     
@@ -32,9 +31,8 @@ class TaskListControllerUITableView: UITableViewController {
         if segue.identifier == "toCreateScreen" {
             let destination = segue.destination as! TaskEdit_TableViewController
             destination.doAfterEdit = { [unowned self] title, priority, status, id in
-                //замыкание будет вызвано после того как будет сохранена задача!
                 let newTask = OneTask(title: title, priority: priority, status: status, id: id)
-                tasksList[priority]?.append(newTask) //добавить в словарь tasksList, новую задачу newTask по ключу priority.
+                tasksList[priority]?.append(newTask)
                 CoreDataManager.shared.saveTask(newTask: newTask)
                 sortingTasks()
                 tableView.reloadData()
@@ -48,9 +46,7 @@ class TaskListControllerUITableView: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // из массива [.important, .normal] получаем значение по индексу секции
         let getTaskPriorityOutSection = sectionsPositionForPriorityTask[section]
-        //используя полученное значение, как ключ для словаря, получаем массив задач
         guard let getCurrentTasksPriority = tasksList[getTaskPriorityOutSection] else {
             return 0
         }
@@ -152,7 +148,7 @@ class TaskListControllerUITableView: UITableViewController {
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         if tasksList[getTaskPriority]!.isEmpty {
-            return false // отключить редактирование строки, если задач нет, чтоб не удалить строку с сообщение "список пуст"
+            return false
         }
         return true
     }
@@ -165,7 +161,7 @@ class TaskListControllerUITableView: UITableViewController {
         let getTaskPriority = sectionsPositionForPriorityTask[indexPath.section]
         let task = tasksList[getTaskPriority]![indexPath.row]
         if editingStyle == .delete {
-            if indexPath.row == 0 { // если это последняя строка, то ее не удалять, чтоб сошлось количество ячеек в numberOfRowsInSection
+            if indexPath.row == 0 {
                 tasksList[getTaskPriority]?.remove(at: indexPath.row)
                 tableView.reloadData()
                 CoreDataManager.shared.deleteNote(id: task.id)
